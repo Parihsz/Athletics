@@ -4,16 +4,16 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 
 import authRoutes from './routes/auth.js'
+import leagueRoutes from './routes/leagues.js'
 import authMiddleware from './middleware/auth.js'
 import User from './models/User.js'
 
 dotenv.config()
 
 const app = express()
+
 app.use(cors())
 app.use(express.json())
-
-import leagueRoutes from './routes/leagues.js'
 
 mongoose.connect(process.env.MONGO_URI)
   .then(async () => {
@@ -39,6 +39,10 @@ app.use('/api', leagueRoutes)
 
 app.get('/api/protected', authMiddleware, (req, res) => {
   res.json({ message: `Hello ${req.user.username}, you have access.` })
+})
+
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not Found' })
 })
 
 const PORT = process.env.PORT || 3000

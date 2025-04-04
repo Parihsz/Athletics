@@ -144,7 +144,7 @@ function select_league(id) {
 
 async function fetch_leagues() {
   try {
-    const { data } = await api.get('/leagues')
+    const { data } = await api.get('api/leagues')
     all_leagues.value = data
     all_games.value = data.flatMap(league =>
       league.games.map(game => ({
@@ -171,10 +171,10 @@ async function submit_league() {
   try {
     const payload = { name: league_name.value, games: games.value }
     if (is_editing.value) {
-      await api.patch(`/leagues/${selected_league_id.value}`, payload)
+      await api.patch(`/api/leagues/${selected_league_id.value}`, payload)
       alert('League updated!')
     } else {
-      await api.post('/leagues', payload)
+      await api.post('/api/leagues', payload)
       alert('League created!')
     }
     reset_form()
@@ -191,7 +191,7 @@ async function delete_league() {
   if (!confirmed) return
 
   try {
-    await api.delete(`/leagues/${selected_league_id.value}`)
+    await api.delete(`/api/leagues/${selected_league_id.value}`)
     alert('League deleted!')
     reset_form()
     fetch_leagues()

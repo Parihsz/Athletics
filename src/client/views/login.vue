@@ -49,7 +49,7 @@ async function handleLogin() {
   }
 
   try {
-    const { data } = await api.post('/login', {
+    const { data } = await api.post('/api/login', {
       username: username.value,
       password: password.value
     })

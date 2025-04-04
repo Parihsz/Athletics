@@ -163,7 +163,7 @@ function APPLY_DATE_FILTER(label) {
 }
 
 async function fetchLeagues() {
-  const { data } = await api.get('/leagues')
+  const { data } = await api.get('/api/leagues')
   all_leagues_raw.value = data
 
   all_events.value = data.flatMap(league =>
