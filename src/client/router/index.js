@@ -25,12 +25,6 @@ const routes = [
     name: 'login',
     component: () => import('@/views/login.vue'),
     meta: { title: 'Login' }
-  },
-  {
-    path: '/:catchAll(.*)',
-    name: 'NotFound',
-    component: () => import('@/views/NotFound.vue'),
-    meta: { title: 'Not Found' }
   }
 ]
 
