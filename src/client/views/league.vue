@@ -92,6 +92,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import draggable from 'vuedraggable'
+import api from '@/api'
 import EventTable from '@/components/eventTable.vue'
 
 const league_name = ref('Gryphons')
@@ -143,8 +144,7 @@ function select_league(id) {
 }
 
 async function fetch_leagues() {
-  const res = await fetch('/api/leagues')
-  const data = await res.json()
+  const { data } = await api.get('/leagues')
   all_leagues.value = data
   all_games.value = data.flatMap(league =>
     league.games.map(game => ({

@@ -33,6 +33,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUser } from '@/stores/user'
+import api from '@/api' 
 
 const router = useRouter()
 const route = useRoute()
@@ -48,14 +49,10 @@ async function handleLogin() {
   }
 
   try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username.value, password: password.value })
+    const { data } = await api.post('/login', {
+      username: username.value,
+      password: password.value
     })
-
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.message)
 
     login(data.token)
 
@@ -63,9 +60,10 @@ async function handleLogin() {
     router.push(redirectPath)
 
   } catch (err) {
-    alert(err.message)
+    alert(err.response?.data?.message || err.message)
   }
 }
 </script>
+
 
 

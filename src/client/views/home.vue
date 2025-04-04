@@ -95,6 +95,8 @@
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
+import api from '@/api'
+
 dayjs.extend(customParseFormat)
 
 import Notifications from '@/components/notifications.vue'
@@ -161,8 +163,7 @@ function APPLY_DATE_FILTER(label) {
 }
 
 async function fetchLeagues() {
-  const res = await fetch('/api/leagues')
-  const data = await res.json()
+  const { data } = await api.get('/leagues')
   all_leagues_raw.value = data
 
   all_events.value = data.flatMap(league =>
