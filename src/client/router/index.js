@@ -48,13 +48,16 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.meta.title)document.title = to.meta.title
+  if (to.meta.title) document.title = to.meta.title
 
-  if (to.meta.requiresAuth && !window.user) {
+  const token = localStorage.getItem('token')
+
+  if (to.meta.requiresAuth && !token) {
     next({ name: 'login', query: { redirect: to.fullPath } })
   } else {
     next()
   }
 })
+
 
 export default router

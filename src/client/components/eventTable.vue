@@ -33,14 +33,8 @@
 
 <script setup>
 const props = defineProps({
-  headers: {
-    type: Array,
-    default: () => ['WHO', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']
-  },
-  events: {
-    type: Array,
-    default: () => []
-  }
+  headers: Array,
+  events: Array
 })
 </script>
 
@@ -80,23 +74,8 @@ table.eventstable tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.04);
   transition: background-color 0.3s ease;
 }
-.fade-in {
-  animation: fadeInRow 0.5s ease-in;
-}
-.clickable-row {
-  cursor: pointer;
-}
-@media (max-width: 768px) {
-  table.eventstable thead th,
-  table.eventstable tbody td {
-    font-size: 0.8rem;
-    padding: 0.5rem;
-  }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.fade-in { animation: fadeInRow 0.5s ease-in; }
+.clickable-row { cursor: pointer; }
 @keyframes fadeInRow {
   from { opacity: 0; }
   to { opacity: 1; }

@@ -32,22 +32,40 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useUser } from '@/stores/user'
 
 const router = useRouter()
 const route = useRoute()
+const { login } = useUser()
 
 const username = ref('')
 const password = ref('')
 
-function handleLogin() {
-  if (username.value && password.value) {
-    window.user = {
-      username: username.value,
-    }
+async function handleLogin() {
+  if (!username.value || !password.value) {
+    alert('Please enter username and password')
+    return
+  }
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username.value, password: password.value })
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message)
+
+    login(data.token)
+
     const redirectPath = route.query.redirect || '/dashboard'
     router.push(redirectPath)
-  } else {
-    alert('Please enter username and password')
+
+  } catch (err) {
+    alert(err.message)
   }
 }
 </script>
+
+

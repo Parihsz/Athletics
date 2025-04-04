@@ -5,13 +5,25 @@
         <Notifications ref="notifications_ref" />
 
         <h1 class="title has-text-centered animated fadeInDown">
-          Welcome to the Athletics Portal
+          Athletics Portal (better than dcipher)
         </h1>
         <p class="subtitle has-text-centered animated fadeInUp delay-1s">
-          Filter events & view your schedule with map & notifications!
+          Filter events and view schedules <3
         </p>
 
-        <div class="columns is-multiline mt-6 animated fadeInUp delay-2s">
+        <div class="box filter-box mb-5 animated fadeInUp delay-2s">
+          <h2 class="subtitle">Select League</h2>
+          <div class="select is-fullwidth">
+            <select v-model="selected_league">
+              <option value="">All Leagues</option>
+              <option v-for="league in leagueNames" :key="league" :value="league">
+                {{ league }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="columns is-multiline animated fadeInUp delay-2s">
           <div class="column is-one-third">
             <div class="box filter-box">
               <h2 class="subtitle">Select Team(s)</h2>
@@ -80,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
@@ -89,95 +101,82 @@ import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
 import Map from '@/components/map.vue'
 
-const ALL_TEAMS = [
-  'Badminton Senior (Gr 9 - 12)',
-  'Badminton U14 (Grades 6 - 8)',
-  'Baseball Senior Boys',
-  'Softball Girls Grades 5 - 6',
-  'Softball Girls Grades 7 - 8',
-  'Track & Field (Gr 6 - 12)',
-  'Ultimate Frisbee (Gr 9 - 12)'
-]
-const OPPONENTS = [
-  'All Opponents',
-  'Lincoln HS',
-  'Valley High',
-  'North River HS'
-]
-const ALL_EVENTS = [
-  {
-    who: 'Badminton Senior (Gr 9 - 12)',
-    when: 'Mar 20, 4:00 PM',
-    what: 'Practice',
-    where: 'Main Gym',
-    vs: 'Lincoln HS',
-    notes: 'Bring water bottle',
-    position: { lat: 40.7128, lng: -74.0060 }
-  },
-  {
-    who: 'Softball Girls Grades 5 - 6',
-    when: 'Mar 21, 3:00 PM',
-    what: 'Game',
-    where: 'East Field',
-    vs: 'Valley High',
-    notes: 'Wear away jerseys',
-    position: { lat: 40.7228, lng: -74.0160 }
-  },
-  {
-    who: 'Baseball Senior Boys',
-    when: 'Mar 22, 5:00 PM',
-    what: 'Practice',
-    where: 'Main Field',
-    vs: 'North River HS',
-    notes: 'Practice hard',
-    position: { lat: 40.7328, lng: -74.0260 }
-  }
-]
-
+const selected_league = ref('')
 const selected_teams = ref([])
 const selected_opponent = ref('All Opponents')
 const selected_date_range = ref('')
+const all_leagues_raw = ref([])
+const all_events = ref([])
 
 const DATE_FILTERS = ['Today', 'Tomorrow', 'This Week', 'Next Week', 'This Season']
 const HEADERS = ['WHO', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']
 
+const leagueNames = computed(() =>
+  Array.from(new Set(all_leagues_raw.value.map(l => l.name)))
+)
+
+const ALL_TEAMS = computed(() => {
+  const leagues = selected_league.value
+    ? all_leagues_raw.value.filter(l => l.name === selected_league.value)
+    : all_leagues_raw.value
+  return Array.from(new Set(leagues.flatMap(l => [l.name])))
+})
+
+const OPPONENTS = computed(() => {
+  const leagues = selected_league.value
+    ? all_leagues_raw.value.filter(l => l.name === selected_league.value)
+    : all_leagues_raw.value
+  const games = leagues.flatMap(l => l.games)
+  return ['All Opponents', ...Array.from(new Set(games.map(g => g.opponent)))]
+})
+
 const SELECTED_DATE_LOOKUP = {
-  'Today': eventDay => eventDay.isSame(dayjs(), 'day'),
-  'Tomorrow': eventDay => eventDay.isSame(dayjs().add(1, 'day'), 'day'),
-  'This Week': eventDay => eventDay.isSame(dayjs(), 'week'),
-  'Next Week': eventDay => {
+  'Today': d => d.isSame(dayjs(), 'day'),
+  'Tomorrow': d => d.isSame(dayjs().add(1, 'day'), 'day'),
+  'This Week': d => d.isSame(dayjs(), 'week'),
+  'Next Week': d => {
     const start = dayjs().add(1, 'week').startOf('week')
     const end = dayjs().add(1, 'week').endOf('week')
-    return eventDay.isBetween(start, end, null, '[]')
+    return d.isBetween(start, end, null, '[]')
   },
-  'This Season': eventDay => {
-    const currentYear = dayjs().year()
-    const seasonStart = dayjs(`Mar 1, ${currentYear}`, 'MMM D, YYYY')
-    const seasonEnd = dayjs(`May 31, ${currentYear}`, 'MMM D, YYYY')
-    return eventDay.isBetween(seasonStart, seasonEnd, null, '[]')
+  'This Season': d => {
+    const year = dayjs().year()
+    return d.isBetween(dayjs(`Mar 1, ${year}`, 'MMM D, YYYY'), dayjs(`May 31, ${year}`, 'MMM D, YYYY'), null, '[]')
   }
 }
+
+const filtered_events = computed(() => {
+  let filtered = [...all_events.value]
+  if (selected_league.value) filtered = filtered.filter(e => e.who === selected_league.value)
+  if (selected_teams.value.length > 0) filtered = filtered.filter(e => selected_teams.value.includes(e.who))
+  if (selected_opponent.value !== 'All Opponents') filtered = filtered.filter(e => e.vs === selected_opponent.value)
+  if (selected_date_range.value) {
+    filtered = filtered.filter(e => SELECTED_DATE_LOOKUP[selected_date_range.value](dayjs(e.when, 'YYYY-MM-DD')))
+  }
+  return filtered
+})
 
 function APPLY_DATE_FILTER(label) {
   selected_date_range.value = label
 }
 
-const filtered_events = computed(() => {
-  let filtered = [...ALL_EVENTS]
-  if (selected_teams.value.length > 0) {
-    filtered = filtered.filter(e => selected_teams.value.includes(e.who))
-  }
-  if (selected_opponent.value !== 'All Opponents') {
-    filtered = filtered.filter(e => e.vs === selected_opponent.value)
-  }
-  if (selected_date_range.value) {
-    filtered = filtered.filter(e => {
-      const eventDay = dayjs(e.when, 'MMM D, h:mm A')
-      return SELECTED_DATE_LOOKUP[selected_date_range.value](eventDay)
-    })
-  }
-  return filtered
-})
+async function fetchLeagues() {
+  const res = await fetch('/api/leagues')
+  const data = await res.json()
+  all_leagues_raw.value = data
+
+  all_events.value = data.flatMap(league =>
+    league.games.map(game => ({
+      who: league.name,
+      when: game.date,
+      what: 'Game',
+      where: game.location,
+      vs: game.opponent,
+      notes: game.notes,
+      position: game.position ?? null
+    }))
+  )
+}
 
 const notifications_ref = ref(null)
 const map_ref = ref(null)
@@ -189,6 +188,8 @@ function notify_user() {
 function handle_row_clicked(event) {
   map_ref.value?.focusOnEvent(event)
 }
+
+onMounted(fetchLeagues)
 </script>
 
 <style scoped>
@@ -197,66 +198,35 @@ function handle_row_clicked(event) {
   padding-top: 3rem;
   padding-bottom: 3rem;
 }
-
 .filter-box {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-
 .checkbox-label {
   display: flex;
   align-items: center;
   font-size: 1rem;
   margin-bottom: 0.25rem;
 }
-.animated {
-  animation-duration: 0.6s;
-  animation-fill-mode: both;
-}
-.fadeInDown {
-  animation-name: fadeInDown;
-}
-.fadeInUp {
-  animation-name: fadeInUp;
-}
-.delay-1s {
-  animation-delay: 0.2s;
-}
-.delay-2s {
-  animation-delay: 0.4s;
-}
-.delay-3s {
-  animation-delay: 0.6s;
-}
+.animated { animation-duration: 0.6s; animation-fill-mode: both; }
+.fadeInDown { animation-name: fadeInDown; }
+.fadeInUp { animation-name: fadeInUp; }
+.delay-1s { animation-delay: 0.2s; }
+.delay-2s { animation-delay: 0.4s; }
+.delay-3s { animation-delay: 0.6s; }
+
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @media (max-width: 768px) {
-  .columns {
-    flex-direction: column;
-  }
-  .filter-box {
-    margin-bottom: 1rem;
-  }
+  .columns { flex-direction: column; }
+  .filter-box { margin-bottom: 1rem; }
 }
 </style>

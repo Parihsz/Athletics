@@ -1,0 +1,27 @@
+diff --git a/node_modules/fast-deep-equal/es6/index.js b/node_modules/fast-deep-equal/es6/index.js
+index d980be2..3f0c754 100644
+--- a/node_modules/fast-deep-equal/es6/index.js
++++ b/node_modules/fast-deep-equal/es6/index.js
+@@ -5,8 +5,7 @@
+ 
+   var envHasBigInt64Array = typeof BigInt64Array !== 'undefined';
+ 
+-
+-module.exports = function equal(a, b) {
++export default function equal(a, b) {
+   if (a === b) return true;
+ 
+   if (a && b && typeof a == 'object' && typeof b == 'object') {
+diff --git a/node_modules/fast-deep-equal/index.js b/node_modules/fast-deep-equal/index.js
+index 30dd1ba..5b8f2a6 100644
+--- a/node_modules/fast-deep-equal/index.js
++++ b/node_modules/fast-deep-equal/index.js
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module.exports = function equal(a, b) {
++export default function equal(a, b) {
+   if (a === b) return true;
+ 
+   if (a && b && typeof a == 'object' && typeof b == 'object') {
