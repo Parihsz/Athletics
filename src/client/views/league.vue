@@ -91,7 +91,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import draggable from 'vuedraggable'
 import api from '@/api'
 import EventTable from '@/components/eventTable.vue'
 
@@ -144,18 +143,23 @@ function select_league(id) {
 }
 
 async function fetch_leagues() {
-  const { data } = await api.get('/leagues')
-  all_leagues.value = data
-  all_games.value = data.flatMap(league =>
-    league.games.map(game => ({
-      who: league.name,
-      when: game.date,
-      what: 'Game',
-      where: game.location,
-      vs: game.opponent,
-      notes: game.notes
-    }))
-  )
+  try {
+    const { data } = await api.get('/leagues')
+    all_leagues.value = data
+    all_games.value = data.flatMap(league =>
+      league.games.map(game => ({
+        who: league.name,
+        when: game.date,
+        what: 'Game',
+        where: game.location,
+        vs: game.opponent,
+        notes: game.notes
+      }))
+    )
+  } catch (err) {
+    alert('Failed to fetch leagues.')
+    console.error(err)
+  }
 }
 
 async function submit_league() {
@@ -164,43 +168,36 @@ async function submit_league() {
     return
   }
 
-  const body = JSON.stringify({ name: league_name.value, games: games.value })
-  const method = is_editing.value ? 'PATCH' : 'POST'
-  const url = is_editing.value ? `/api/leagues/${selected_league_id.value}` : '/api/leagues'
-
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body
-  })
-
-  if (res.ok) {
-    alert(is_editing.value ? 'League updated!' : 'League created!')
+  try {
+    const payload = { name: league_name.value, games: games.value }
+    if (is_editing.value) {
+      await api.patch(`/leagues/${selected_league_id.value}`, payload)
+      alert('League updated!')
+    } else {
+      await api.post('/leagues', payload)
+      alert('League created!')
+    }
     reset_form()
     fetch_leagues()
-  } else {
-    const data = await res.json()
-    alert(`Error: ${data.message}`)
+  } catch (err) {
+    alert(`Error: ${err.response?.data?.message || err.message}`)
+    console.error(err)
   }
 }
 
 async function delete_league() {
   if (!selected_league_id.value) return
-
   const confirmed = confirm('Are you sure you want to delete this league?')
   if (!confirmed) return
 
-  const res = await fetch(`/api/leagues/${selected_league_id.value}`, {
-    method: 'DELETE'
-  })
-
-  if (res.ok) {
+  try {
+    await api.delete(`/leagues/${selected_league_id.value}`)
     alert('League deleted!')
     reset_form()
     fetch_leagues()
-  } else {
-    const data = await res.json()
-    alert(`Error deleting league: ${data.message}`)
+  } catch (err) {
+    alert(`Error deleting league: ${err.response?.data?.message || err.message}`)
+    console.error(err)
   }
 }
 
