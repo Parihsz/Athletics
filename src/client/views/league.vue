@@ -245,4 +245,13 @@ onMounted(fetch_leagues)
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+h1.title, p.subtitle {
+  color: #222;
+}
+
+@media (prefers-color-scheme: dark) {
+  h1.title, p.subtitle {
+    color: #000000;
+  }
+}
 </style>

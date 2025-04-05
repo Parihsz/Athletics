@@ -80,4 +80,13 @@ table.eventstable tbody tr:hover {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+h1.title, p.subtitle {
+  color: #222;
+}
+
+@media (prefers-color-scheme: dark) {
+  h1.title, p.subtitle {
+    color: #000000;
+  }
+}
 </style>
