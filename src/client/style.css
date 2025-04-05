@@ -1,5 +1,9 @@
 @import 'bulma/css/bulma.css';
 
+html {
+  forced-color-adjust: none;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
