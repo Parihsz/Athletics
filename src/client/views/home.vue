@@ -230,4 +230,13 @@ onMounted(fetchLeagues)
   .columns { flex-direction: column; }
   .filter-box { margin-bottom: 1rem; }
 }
+h1.title, p.subtitle {
+  color: #222;
+}
+
+@media (prefers-color-scheme: dark) {
+  h1.title, p.subtitle {
+    color: #000000;
+  }
+}
 </style>
