@@ -109,9 +109,8 @@ import api from '@/api'
 import EventTable from '@/components/eventTable.vue'
 
 const league_name = ref('')
-const teams = ref([
-  { name: '', games: [{ date: '', opponent: '', location: '', notes: '' }] }
-])
+const teams = ref([])
+
 const all_leagues = ref([])
 const all_games = ref([])
 const selected_league_id = ref('')
@@ -231,9 +230,7 @@ async function delete_league() {
 function reset_form() {
   selected_league_id.value = ''
   league_name.value = ''
-  teams.value = [
-    { name: '', games: [{ date: '', opponent: '', location: '', notes: '' }] }
-  ]
+  teams.value = [] 
 }
 
 onMounted(fetch_leagues)
