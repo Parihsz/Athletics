@@ -16,7 +16,7 @@
 
         <div class="field mt-4">
           <label class="label">League Name</label>
-          <input v-model="league_name" class="input" type="text" placeholder="e.g. Spring 2025 League" />
+          <input v-model="league_name" class="input" type="text" placeholder="e.g. D1 Basketball" />
         </div>
 
         <div v-for="(team, tIndex) in teams" :key="tIndex" class="box mb-5">
@@ -108,9 +108,9 @@ import { ref, computed, onMounted } from 'vue'
 import api from '@/api'
 import EventTable from '@/components/eventTable.vue'
 
-const league_name = ref('Gryphons')
+const league_name = ref('')
 const teams = ref([
-  { name: 'Gryphons', games: [{ date: '', opponent: '', location: '', notes: '' }] }
+  { name: '', games: [{ date: '', opponent: '', location: '', notes: '' }] }
 ])
 const all_leagues = ref([])
 const all_games = ref([])
@@ -230,9 +230,9 @@ async function delete_league() {
 
 function reset_form() {
   selected_league_id.value = ''
-  league_name.value = 'Gryphons'
+  league_name.value = ''
   teams.value = [
-    { name: 'Gryphons', games: [{ date: '', opponent: '', location: '', notes: '' }] }
+    { name: '', games: [{ date: '', opponent: '', location: '', notes: '' }] }
   ]
 }
 
