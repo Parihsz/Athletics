@@ -34,14 +34,6 @@
         </router-link>
 
         <router-link
-          v-if="user"
-          to="/dashboard"
-          class="navbar-item nav-link"
-        >
-          Admin
-        </router-link>
-
-        <router-link
           v-if="!user"
           to="/login"
           class="navbar-item nav-link"
