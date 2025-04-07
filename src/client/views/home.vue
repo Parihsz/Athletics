@@ -30,12 +30,7 @@
               <div class="team-checkboxes" style="max-height: 300px; overflow-y: auto;">
                 <div class="field mb-2" v-for="team in ALL_TEAMS" :key="team">
                   <label class="checkbox-label">
-                    <input
-                      type="checkbox"
-                      class="checkbox mr-2"
-                      :value="team"
-                      v-model="selected_teams"
-                    />
+                    <input type="checkbox" class="checkbox mr-2" :value="team" v-model="selected_teams" />
                     {{ team }}
                   </label>
                 </div>
@@ -49,6 +44,7 @@
               <h2 class="subtitle">Select the Opponent</h2>
               <div class="select is-fullwidth">
                 <select v-model="selected_opponent">
+                  <option>All Opponents</option>
                   <option v-for="opp in OPPONENTS" :key="opp" :value="opp">
                     {{ opp }}
                   </option>
@@ -73,13 +69,11 @@
         <div class="columns mt-6 animated fadeInUp delay-3s">
           <div class="column is-two-thirds">
             <EventTable
-              :headers="HEADERS"
+              :headers="['LEAGUE', 'TEAM', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']"
               :events="filtered_events"
               @rowClicked="handle_row_clicked"
             />
-            <button class="button is-primary mt-3" @click="notify_user">
-              Notify Me!
-            </button>
+            <button class="button is-primary mt-3" @click="notify_user">Notify Me!</button>
           </div>
 
           <div class="column">
@@ -95,10 +89,9 @@
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import api from '@/api'
-
 dayjs.extend(customParseFormat)
 
+import api from '@/api'
 import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
 import Map from '@/components/map.vue'
@@ -107,28 +100,26 @@ const selected_league = ref('')
 const selected_teams = ref([])
 const selected_opponent = ref('All Opponents')
 const selected_date_range = ref('')
+
 const all_leagues_raw = ref([])
 const all_events = ref([])
 
 const DATE_FILTERS = ['Today', 'Tomorrow', 'This Week', 'Next Week', 'This Season']
-const HEADERS = ['WHO', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']
 
-const leagueNames = computed(() =>
-  Array.from(new Set(all_leagues_raw.value.map(l => l.name)))
-)
+const leagueNames = computed(() => Array.from(new Set(all_leagues_raw.value.map(l => l.name))))
 
 const ALL_TEAMS = computed(() => {
   const leagues = selected_league.value
     ? all_leagues_raw.value.filter(l => l.name === selected_league.value)
     : all_leagues_raw.value
-  return Array.from(new Set(leagues.flatMap(l => [l.name])))
+  return Array.from(new Set(leagues.flatMap(l => l.teams.map(t => t.name))))
 })
 
 const OPPONENTS = computed(() => {
   const leagues = selected_league.value
     ? all_leagues_raw.value.filter(l => l.name === selected_league.value)
     : all_leagues_raw.value
-  const games = leagues.flatMap(l => l.games)
+  const games = leagues.flatMap(l => l.teams.flatMap(t => t.games))
   return ['All Opponents', ...Array.from(new Set(games.map(g => g.opponent)))]
 })
 
@@ -149,8 +140,8 @@ const SELECTED_DATE_LOOKUP = {
 
 const filtered_events = computed(() => {
   let filtered = [...all_events.value]
-  if (selected_league.value) filtered = filtered.filter(e => e.who === selected_league.value)
-  if (selected_teams.value.length > 0) filtered = filtered.filter(e => selected_teams.value.includes(e.who))
+  if (selected_league.value) filtered = filtered.filter(e => e.league === selected_league.value)
+  if (selected_teams.value.length > 0) filtered = filtered.filter(e => selected_teams.value.includes(e.team))
   if (selected_opponent.value !== 'All Opponents') filtered = filtered.filter(e => e.vs === selected_opponent.value)
   if (selected_date_range.value) {
     filtered = filtered.filter(e => SELECTED_DATE_LOOKUP[selected_date_range.value](dayjs(e.when, 'YYYY-MM-DD')))
@@ -167,15 +158,18 @@ async function fetchLeagues() {
   all_leagues_raw.value = data
 
   all_events.value = data.flatMap(league =>
-    league.games.map(game => ({
-      who: league.name,
-      when: game.date,
-      what: 'Game',
-      where: game.location,
-      vs: game.opponent,
-      notes: game.notes,
-      position: game.position ?? null
-    }))
+    league.teams.flatMap(team =>
+      team.games.map(game => ({
+        league: league.name,
+        team: team.name,
+        when: game.date,
+        what: 'Game',
+        where: game.location,
+        vs: game.opponent,
+        notes: game.notes,
+        position: game.position ?? null
+      }))
+    )
   )
 }
 

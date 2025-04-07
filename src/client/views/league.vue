@@ -19,21 +19,35 @@
           <input v-model="league_name" class="input" type="text" placeholder="e.g. Spring 2025 League" />
         </div>
 
-        <div v-for="(game, index) in games" :key="index" class="box game-card mt-4">
-          <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
-            <strong class="is-size-6">Game {{ index + 1 }}</strong>
-            <div>
-              <button class="button is-info is-small mr-2" @click="open_editor(index)">Edit</button>
-              <button class="button is-danger is-small" @click="remove_game(index)">Delete</button>
-            </div>
+        <div v-for="(team, tIndex) in teams" :key="tIndex" class="box mb-5">
+          <div class="field">
+            <label class="label">Team {{ tIndex + 1 }} Name</label>
+            <input v-model="team.name" class="input" placeholder="Team Name" />
           </div>
-          <p class="is-size-7 has-text-grey">
-            {{ game.date }} | {{ game.opponent }} | {{ game.location }}
-          </p>
+
+          <div
+            v-for="(game, gIndex) in team.games"
+            :key="gIndex"
+            class="box game-card mt-3"
+          >
+            <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
+              <strong class="is-size-6">Game {{ gIndex + 1 }}</strong>
+              <div>
+                <button class="button is-info is-small mr-2" @click="open_editor(tIndex, gIndex)">Edit</button>
+                <button class="button is-danger is-small" @click="remove_game(tIndex, gIndex)">Delete</button>
+              </div>
+            </div>
+            <p class="is-size-7 has-text-grey">
+              {{ game.date }} | {{ game.opponent }} | {{ game.location }}
+            </p>
+          </div>
+
+          <button class="button is-link is-light mt-3" @click="add_game(tIndex)">Add Game</button>
+          <button class="button is-danger is-light mt-3" @click="remove_team(tIndex)">Remove Team</button>
         </div>
 
         <div class="buttons is-justify-content-space-between mt-5">
-          <button class="button is-link is-light" @click="add_game">Add Game</button>
+          <button class="button is-success is-light" @click="add_team">Add Team</button>
           <button class="button is-primary is-fullwidth animated bounceIn" @click="submit_league">
             {{ is_editing ? 'Update League' : 'Create League' }}
           </button>
@@ -95,51 +109,62 @@ import api from '@/api'
 import EventTable from '@/components/eventTable.vue'
 
 const league_name = ref('Gryphons')
-const games = ref([{ date: '', opponent: '', location: '', notes: '' }])
-const all_games = ref([])
+const teams = ref([
+  { name: 'Gryphons', games: [{ date: '', opponent: '', location: '', notes: '' }] }
+])
 const all_leagues = ref([])
+const all_games = ref([])
 const selected_league_id = ref('')
 const is_editing = computed(() => !!selected_league_id.value)
 
 const show_modal = ref(false)
 const modal_game = ref({})
+const modal_team_index = ref(null)
 const modal_game_index = ref(null)
 
-const RESET_FORM = () => ({
-  league_name: 'Gryphons',
-  games: [{ date: '', opponent: '', location: '', notes: '' }]
-})
-
-function open_editor(index) {
-  modal_game_index.value = index
-  modal_game.value = { ...games.value[index] }
+function open_editor(teamIndex, gameIndex) {
+  modal_team_index.value = teamIndex
+  modal_game_index.value = gameIndex
+  modal_game.value = { ...teams.value[teamIndex].games[gameIndex] }
   show_modal.value = true
 }
 
 function save_game_edits() {
-  games.value[modal_game_index.value] = { ...modal_game.value }
+  teams.value[modal_team_index.value].games[modal_game_index.value] = { ...modal_game.value }
   close_editor()
 }
 
 function close_editor() {
   show_modal.value = false
   modal_game.value = {}
+  modal_team_index.value = null
   modal_game_index.value = null
 }
 
-function add_game() {
-  games.value.push({ date: '', opponent: '', location: '', notes: '' })
+function add_team() {
+  teams.value.push({
+    name: '',
+    games: [{ date: '', opponent: '', location: '', notes: '' }]
+  })
 }
 
-function remove_game(index) {
-  games.value.splice(index, 1)
+function remove_team(index) {
+  teams.value.splice(index, 1)
+}
+
+function add_game(teamIndex) {
+  teams.value[teamIndex].games.push({ date: '', opponent: '', location: '', notes: '' })
+}
+
+function remove_game(teamIndex, gameIndex) {
+  teams.value[teamIndex].games.splice(gameIndex, 1)
 }
 
 function select_league(id) {
   const found = all_leagues.value.find(l => l._id === id)
   if (!found) return
   league_name.value = found.name
-  games.value = [...found.games]
+  teams.value = found.teams || []
 }
 
 async function fetch_leagues() {
@@ -147,14 +172,16 @@ async function fetch_leagues() {
     const { data } = await api.get('api/leagues')
     all_leagues.value = data
     all_games.value = data.flatMap(league =>
-      league.games.map(game => ({
-        who: league.name,
-        when: game.date,
-        what: 'Game',
-        where: game.location,
-        vs: game.opponent,
-        notes: game.notes
-      }))
+      (league.teams || []).flatMap(team =>
+        team.games.map(game => ({
+          who: `${league.name} - ${team.name}`,
+          when: game.date,
+          what: 'Game',
+          where: game.location,
+          vs: game.opponent,
+          notes: game.notes
+        }))
+      )
     )
   } catch (err) {
     alert('Failed to fetch leagues.')
@@ -163,13 +190,13 @@ async function fetch_leagues() {
 }
 
 async function submit_league() {
-  if (!league_name.value || games.value.length === 0) {
-    alert('Please enter a league name and at least one game.')
+  if (!league_name.value || teams.value.length === 0) {
+    alert('Please enter a league name and at least one team.')
     return
   }
 
   try {
-    const payload = { name: league_name.value, games: games.value }
+    const payload = { name: league_name.value, teams: teams.value }
     if (is_editing.value) {
       await api.patch(`/api/leagues/${selected_league_id.value}`, payload)
       alert('League updated!')
@@ -202,10 +229,11 @@ async function delete_league() {
 }
 
 function reset_form() {
-  const reset = RESET_FORM()
   selected_league_id.value = ''
-  league_name.value = reset.league_name
-  games.value = reset.games
+  league_name.value = 'Gryphons'
+  teams.value = [
+    { name: 'Gryphons', games: [{ date: '', opponent: '', location: '', notes: '' }] }
+  ]
 }
 
 onMounted(fetch_leagues)

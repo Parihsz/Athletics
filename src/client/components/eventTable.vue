@@ -15,7 +15,8 @@
             class="fade-in clickable-row"
             @click="$emit('rowClicked', event)"
           >
-            <td>{{ event.who }}</td>
+            <td>{{ event.league }}</td>
+            <td>{{ event.team }}</td>
             <td>{{ event.when }}</td>
             <td>{{ event.what }}</td>
             <td>{{ event.where }}</td>
@@ -23,7 +24,7 @@
             <td>{{ event.notes }}</td>
           </tr>
           <tr v-if="events.length === 0">
-            <td colspan="6" class="has-text-centered">No events found!</td>
+            <td colspan="7" class="has-text-centered">No events found!</td>
           </tr>
         </tbody>
       </table>
