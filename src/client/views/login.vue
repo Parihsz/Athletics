@@ -56,7 +56,7 @@ async function handleLogin() {
 
     login(data.token)
 
-    const redirectPath = route.query.redirect || '/dashboard'
+    const redirectPath = route.query.redirect || '/league'
     router.push(redirectPath)
 
   } catch (err) {
