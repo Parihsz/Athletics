@@ -4,13 +4,13 @@ import League from '../models/League.js'
 const router = express.Router()
 
 router.post('/leagues', async (req, res) => {
-  const { name, games } = req.body
-  if (!name || !Array.isArray(games)) {
-    return res.status(400).json({ message: 'Missing league name or games array' })
+  const { name, teams } = req.body
+  if (!name || !Array.isArray(teams)) {
+    return res.status(400).json({ message: 'Missing league name or teams array' })
   }
 
   try {
-    const league = new League({ name, games })
+    const league = new League({ name, teams })
     await league.save()
     res.status(201).json({ message: 'League created', league })
   } catch (err) {
@@ -28,15 +28,15 @@ router.get('/leagues', async (req, res) => {
 })
 
 router.patch('/leagues/:id', async (req, res) => {
-  const { name, games } = req.body
-  if (!name || !Array.isArray(games)) {
-    return res.status(400).json({ message: 'Missing league name or games array' })
+  const { name, teams } = req.body
+  if (!name || !Array.isArray(teams)) {
+    return res.status(400).json({ message: 'Missing league name or teams array' })
   }
 
   try {
     const league = await League.findByIdAndUpdate(
       req.params.id,
-      { name, games },
+      { name, teams },
       { new: true }
     )
     if (!league) return res.status(404).json({ message: 'League not found' })
