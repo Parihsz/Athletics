@@ -105,7 +105,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/api'
-import EventTable from '@/components/EventTable.vue'
+import EventTable from '@/components/eventTable.vue'
 import LocationInput from '@/components/LocationInput.vue'
 
 const league_name = ref('')
