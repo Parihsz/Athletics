@@ -37,10 +37,10 @@ const props = defineProps({
   headers: Array,
   events: Array
 })
-
 const emit = defineEmits(['rowClicked'])
 
 function handleClick(event) {
+  console.log('[EventTable] Row clicked:', event)
   emit('rowClicked', event)
 }
 </script>
@@ -109,18 +109,6 @@ table.eventstable tbody tr:hover {
   }
   to {
     opacity: 1;
-  }
-}
-
-h1.title,
-p.subtitle {
-  color: #222;
-}
-
-@media (prefers-color-scheme: dark) {
-  h1.title,
-  p.subtitle {
-    color: #000000;
   }
 }
 </style>

@@ -35,6 +35,7 @@
             </div>
             <p class="is-size-7 has-text-grey">
               {{ game.date }} | {{ game.opponent }} | {{ game.location }}
+              <button class="button is-text is-small ml-2" @click="open_map(game)">📍</button>
             </p>
           </div>
 
@@ -61,8 +62,15 @@
       <div class="box mt-6 animated fadeIn">
         <h2 class="subtitle mb-4">Saved Leagues & Games</h2>
         <div v-if="all_games.length === 0" class="has-text-grey is-italic">No leagues yet</div>
-        <EventTable v-else :headers="['WHO', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']" :events="all_games" />
+        <EventTable
+          v-else
+          :headers="['WHO', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']"
+          :events="all_games"
+          @rowClicked="open_map"
+        />
       </div>
+
+      <MapModal :event="map_event" :visible="show_map_modal" @close="close_map" />
 
       <div class="modal" :class="{ 'is-active': show_modal }">
         <div class="modal-background" @click="close_editor"></div>
@@ -107,19 +115,31 @@ import { ref, computed, onMounted } from 'vue'
 import api from '@/api'
 import EventTable from '@/components/eventTable.vue'
 import LocationInput from '@/components/locationInput.vue'
+import MapModal from '@/components/MapModal.vue'
 
 const league_name = ref('')
 const teams = ref([])
-
 const all_leagues = ref([])
 const all_games = ref([])
 const selected_league_id = ref('')
 const is_editing = computed(() => !!selected_league_id.value)
 
 const show_modal = ref(false)
+const show_map_modal = ref(false)
+const map_event = ref(null)
+
 const modal_game = ref({})
 const modal_team_index = ref(null)
 const modal_game_index = ref(null)
+
+function open_map(event) {
+  map_event.value = event
+  show_map_modal.value = true
+}
+
+function close_map() {
+  show_map_modal.value = false
+}
 
 function open_editor(teamIndex, gameIndex) {
   modal_team_index.value = teamIndex
@@ -129,8 +149,6 @@ function open_editor(teamIndex, gameIndex) {
 }
 
 async function save_game_edits() {
-  console.log('[SAVE] modal_game:', modal_game.value)
-
   if (modal_game.value.location && window.google?.maps?.Geocoder) {
     const geocoder = new google.maps.Geocoder()
     try {
@@ -143,24 +161,17 @@ async function save_game_edits() {
           }
         })
       })
-
       modal_game.value.position = {
         lat: result.geometry.location.lat(),
         lng: result.geometry.location.lng()
       }
-
-      console.log('[GEOCODE] Success:', modal_game.value.position)
-
     } catch (err) {
-      console.warn('[GEOCODE] Failed:', err)
       modal_game.value.position = null
     }
   }
-
   teams.value[modal_team_index.value].games[modal_game_index.value] = { ...modal_game.value }
   close_editor()
 }
-
 
 function close_editor() {
   show_modal.value = false
@@ -170,24 +181,17 @@ function close_editor() {
 }
 
 function add_team() {
-  teams.value.push({
-    name: '',
-    games: [{ date: '', opponent: '', location: '', notes: '', position: null }]
-  })
+  teams.value.push({ name: '', games: [{ date: '', opponent: '', location: '', notes: '', position: null }] })
 }
-
 function remove_team(index) {
   teams.value.splice(index, 1)
 }
-
 function add_game(teamIndex) {
   teams.value[teamIndex].games.push({ date: '', opponent: '', location: '', notes: '', position: null })
 }
-
 function remove_game(teamIndex, gameIndex) {
   teams.value[teamIndex].games.splice(gameIndex, 1)
 }
-
 function select_league(id) {
   const found = all_leagues.value.find(l => l._id === id)
   if (!found) return
@@ -207,7 +211,8 @@ async function fetch_leagues() {
           what: 'Game',
           where: game.location,
           vs: game.opponent,
-          notes: game.notes
+          notes: game.notes,
+          position: game.position ?? null
         }))
       )
     )
@@ -222,7 +227,6 @@ async function submit_league() {
     alert('Please enter a league name and at least one team.')
     return
   }
-
   try {
     const payload = { name: league_name.value, teams: teams.value }
     if (is_editing.value) {
@@ -242,9 +246,7 @@ async function submit_league() {
 
 async function delete_league() {
   if (!selected_league_id.value) return
-  const confirmed = confirm('Are you sure you want to delete this league?')
-  if (!confirmed) return
-
+  if (!confirm('Are you sure you want to delete this league?')) return
   try {
     await api.delete(`/api/leagues/${selected_league_id.value}`)
     alert('League deleted!')
@@ -272,7 +274,6 @@ onMounted(fetch_leagues)
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
-
 .game-card {
   border-left: 4px solid #3273dc;
   border-radius: 6px;
@@ -282,7 +283,6 @@ onMounted(fetch_leagues)
 .game-card:hover {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
-
 .animated {
   animation-duration: 0.5s;
   animation-fill-mode: both;
@@ -290,7 +290,6 @@ onMounted(fetch_leagues)
 .fadeInDown { animation-name: fadeInDown; }
 .fadeInUp { animation-name: fadeInUp; }
 .bounceIn { animation-name: bounceIn; }
-
 @keyframes fadeInDown {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -299,12 +298,8 @@ onMounted(fetch_leagues)
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-h1.title, p.subtitle {
-  color: #222;
-}
+h1.title, p.subtitle { color: #222; }
 @media (prefers-color-scheme: dark) {
-  h1.title, p.subtitle {
-    color: #000000;
-  }
+  h1.title, p.subtitle { color: #000; }
 }
 </style>

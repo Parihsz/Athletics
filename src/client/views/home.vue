@@ -90,19 +90,21 @@ dayjs.extend(customParseFormat)
 import api from '@/api'
 import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
+import MapModal from '@/components/MapModal.vue' // ✅
 
 const selected_league = ref('')
 const selected_teams = ref([])
 const selected_opponent = ref('All Opponents')
 const selected_date_range = ref('')
-
 const all_leagues_raw = ref([])
 const all_events = ref([])
+
+const map_event = ref(null) // ✅
+const show_map_modal = ref(false) // ✅
 
 const DATE_FILTERS = ['Today', 'Tomorrow', 'This Week', 'Next Week', 'This Season']
 
 const leagueNames = computed(() => Array.from(new Set(all_leagues_raw.value.map(l => l.name))))
-
 const ALL_TEAMS = computed(() => {
   const leagues = selected_league.value
     ? all_leagues_raw.value.filter(l => l.name === selected_league.value)
@@ -169,14 +171,18 @@ async function fetchLeagues() {
 }
 
 const notifications_ref = ref(null)
-const map_ref = ref(null)
 
 function notify_user() {
   notifications_ref.value?.addNotification('Upcoming event: Check the schedule!')
 }
 
 function handle_row_clicked(event) {
-  map_ref.value?.focusOnEvent(event)
+  map_event.value = event
+  show_map_modal.value = true
+}
+
+function close_map_modal() {
+  show_map_modal.value = false
 }
 
 onMounted(fetchLeagues)

@@ -4,7 +4,7 @@
     <div class="modal-content">
       <div ref="mapContainer" class="google-map"></div>
     </div>
-    <button class="modal-close is-large" @click="close"></button>
+    <button class="modal-close is-large" @click="close" />
   </div>
 </template>
 
@@ -43,9 +43,7 @@ watch(() => props.visible, async (newVal) => {
           map.setCenter(location)
         }
 
-        if (marker) {
-          marker.setMap(null)
-        }
+        if (marker) marker.setMap(null)
 
         marker = new google.maps.Marker({
           map,
