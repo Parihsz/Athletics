@@ -47,13 +47,22 @@ function handleClick(event) {
 
 <style scoped>
 .event-table-container {
-  padding: 1rem;
-  animation: fadeIn 0.5s ease-out;
+  width: 100%;
+  max-width: 100%;
+  padding: 2rem 1rem 0 1rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
 .table-wrapper {
-  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
   margin-top: 1rem;
+  overflow-x: auto;
 }
+
 table.eventstable {
   border-collapse: separate;
   border-spacing: 0;
@@ -62,9 +71,11 @@ table.eventstable {
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 table.eventstable thead {
   background-color: #222;
 }
+
 table.eventstable thead th {
   color: #fff;
   padding: 0.75rem;
@@ -72,27 +83,43 @@ table.eventstable thead th {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+
 table.eventstable tbody td {
   padding: 0.75rem;
   font-size: 0.9rem;
   color: #222;
 }
+
 table.eventstable tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.04);
   transition: background-color 0.3s ease;
 }
-.fade-in { animation: fadeInRow 0.5s ease-in; }
-.clickable-row { cursor: pointer; }
-@keyframes fadeInRow {
-  from { opacity: 0; }
-  to { opacity: 1; }
+
+.fade-in {
+  animation: fadeInRow 0.5s ease-in;
 }
-h1.title, p.subtitle {
+
+.clickable-row {
+  cursor: pointer;
+}
+
+@keyframes fadeInRow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+h1.title,
+p.subtitle {
   color: #222;
 }
 
 @media (prefers-color-scheme: dark) {
-  h1.title, p.subtitle {
+  h1.title,
+  p.subtitle {
     color: #000000;
   }
 }

@@ -25,11 +25,7 @@
             <input v-model="team.name" class="input" placeholder="Team Name" />
           </div>
 
-          <div
-            v-for="(game, gIndex) in team.games"
-            :key="gIndex"
-            class="box game-card mt-3"
-          >
+          <div v-for="(game, gIndex) in team.games" :key="gIndex" class="box game-card mt-3">
             <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
               <strong class="is-size-6">Game {{ gIndex + 1 }}</strong>
               <div>
@@ -86,7 +82,10 @@
             </div>
             <div class="field">
               <label class="label">Location</label>
-              <input v-model="modal_game.location" class="input" />
+              <LocationInput
+                v-model="modal_game.location"
+                @update:position="modal_game.position = $event"
+              />
             </div>
             <div class="field">
               <label class="label">Notes</label>
@@ -106,7 +105,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '@/api'
-import EventTable from '@/components/eventTable.vue'
+import EventTable from '@/components/EventTable.vue'
+import LocationInput from '@/components/LocationInput.vue'
 
 const league_name = ref('')
 const teams = ref([])
@@ -143,7 +143,7 @@ function close_editor() {
 function add_team() {
   teams.value.push({
     name: '',
-    games: [{ date: '', opponent: '', location: '', notes: '' }]
+    games: [{ date: '', opponent: '', location: '', notes: '', position: null }]
   })
 }
 
@@ -152,7 +152,7 @@ function remove_team(index) {
 }
 
 function add_game(teamIndex) {
-  teams.value[teamIndex].games.push({ date: '', opponent: '', location: '', notes: '' })
+  teams.value[teamIndex].games.push({ date: '', opponent: '', location: '', notes: '', position: null })
 }
 
 function remove_game(teamIndex, gameIndex) {
@@ -230,7 +230,7 @@ async function delete_league() {
 function reset_form() {
   selected_league_id.value = ''
   league_name.value = ''
-  teams.value = [] 
+  teams.value = []
 }
 
 onMounted(fetch_leagues)
@@ -273,7 +273,6 @@ onMounted(fetch_leagues)
 h1.title, p.subtitle {
   color: #222;
 }
-
 @media (prefers-color-scheme: dark) {
   h1.title, p.subtitle {
     color: #000000;
