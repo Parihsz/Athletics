@@ -16,8 +16,8 @@ const props = defineProps({
   modelValue: String,
   placeholder: { type: String, default: 'Enter a location' }
 })
-
 const emit = defineEmits(['update:modelValue', 'update:position'])
+
 const locationInput = ref(null)
 
 onMounted(() => {
