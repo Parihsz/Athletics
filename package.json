@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@fawmi/vue-google-maps": "^0.9.79",
+    "@googlemaps/js-api-loader": "^1.16.8",
     "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "bulma": "^1.0.3",
