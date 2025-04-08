@@ -1,18 +1,16 @@
 <template>
   <div>
     <input
+      v-model="localValue"
       class="input"
       type="text"
       :placeholder="placeholder"
-      :value="modelValue"
-      @input="handleInput"
-      @blur="geocodeLocation"
     />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   modelValue: String,
@@ -20,36 +18,23 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue', 'update:position'])
 
-function handleInput(event) {
-  emit('update:modelValue', event.target.value)
-}
+const localValue = ref(props.modelValue || '')
 
-function geocodeLocation() {
-  if (!window.google || !window.google.maps) {
-    console.warn('[LocationInput] Google Maps JS API not loaded')
-    return
+watch(() => props.modelValue, newVal => {
+  if (newVal !== localValue.value) {
+    localValue.value = newVal
   }
+})
 
-  const geocoder = new google.maps.Geocoder()
-  const address = props.modelValue
+watch(localValue, newVal => {
+  emit('update:modelValue', newVal)
+})
 
-  console.log('[LocationInput] Geocoding:', address)
-
-  geocoder.geocode({ address }, (results, status) => {
-    if (status !== 'OK') {
-      console.warn('[LocationInput] Geocode failed:', status)
-      return
-    }
-
-    const result = results[0]
-    const location = result.geometry.location
-    console.log('[LocationInput] First geocode result:', result)
-
-    emit('update:modelValue', result.formatted_address)
-    emit('update:position', {
-      lat: location.lat(),
-      lng: location.lng()
-    })
-  })
-}
+// Optional: geocode when typing stops (debounced) OR let parent do it on submit
 </script>
+
+<style scoped>
+.input {
+  width: 100%;
+}
+</style>

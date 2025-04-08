@@ -128,10 +128,39 @@ function open_editor(teamIndex, gameIndex) {
   show_modal.value = true
 }
 
-function save_game_edits() {
+async function save_game_edits() {
+  console.log('[SAVE] modal_game:', modal_game.value)
+
+  if (modal_game.value.location && window.google?.maps?.Geocoder) {
+    const geocoder = new google.maps.Geocoder()
+    try {
+      const result = await new Promise((resolve, reject) => {
+        geocoder.geocode({ address: modal_game.value.location }, (res, status) => {
+          if (status === 'OK' && res[0]?.geometry?.location) {
+            resolve(res[0])
+          } else {
+            reject('Geocode failed: ' + status)
+          }
+        })
+      })
+
+      modal_game.value.position = {
+        lat: result.geometry.location.lat(),
+        lng: result.geometry.location.lng()
+      }
+
+      console.log('[GEOCODE] Success:', modal_game.value.position)
+
+    } catch (err) {
+      console.warn('[GEOCODE] Failed:', err)
+      modal_game.value.position = null
+    }
+  }
+
   teams.value[modal_team_index.value].games[modal_game_index.value] = { ...modal_game.value }
   close_editor()
 }
+
 
 function close_editor() {
   show_modal.value = false
