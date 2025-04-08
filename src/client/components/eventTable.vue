@@ -13,7 +13,7 @@
             v-for="(event, idx) in events"
             :key="idx"
             class="fade-in clickable-row"
-            @click="$emit('rowClicked', event)"
+            @click="handleClick(event)"
           >
             <td>{{ event.league }}</td>
             <td>{{ event.team }}</td>
@@ -37,6 +37,12 @@ const props = defineProps({
   headers: Array,
   events: Array
 })
+
+const emit = defineEmits(['rowClicked'])
+
+function handleClick(event) {
+  emit('rowClicked', event)
+}
 </script>
 
 <style scoped>

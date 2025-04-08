@@ -75,10 +75,6 @@
             />
             <button class="button is-primary mt-3" @click="notify_user">Notify Me!</button>
           </div>
-
-          <div class="column">
-            <Map ref="map_ref" :events="filtered_events" />
-          </div>
         </div>
       </div>
     </div>
@@ -94,7 +90,6 @@ dayjs.extend(customParseFormat)
 import api from '@/api'
 import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
-import Map from '@/components/map.vue'
 
 const selected_league = ref('')
 const selected_teams = ref([])
