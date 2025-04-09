@@ -87,9 +87,6 @@
               :events="filtered_events"
               @rowClicked="handle_row_clicked"
             />
-            <div class="has-text-centered">
-              <button class="button is-primary mt-5" @click="notify_user">Notify Me!</button>
-            </div>
           </div>
         </div>
 
