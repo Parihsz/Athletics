@@ -2,7 +2,6 @@
   <section class="hero is-fullheight-with-navbar home-hero">
     <div class="hero-body">
       <div class="container">
-        <Notifications ref="notifications_ref" />
 
         <h1 class="title has-text-centered animated fadeInDown">
           Athletics Portal (better than dcipher)
@@ -112,7 +111,6 @@ import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
 
-import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
 import MapModal from '@/components/mapModal.vue'
 
@@ -184,10 +182,6 @@ function APPLY_DATE_FILTER(label) {
   selected_date_range.value = label
 }
 
-function notify_user() {
-  notifications_ref.value?.addNotification('Upcoming event: Check the schedule!')
-}
-
 function handle_row_clicked(event) {
   console.log('[handle_row_clicked]', event)
   map_event.value = event
@@ -197,8 +191,6 @@ function handle_row_clicked(event) {
 function close_map_modal() {
   show_map_modal.value = false
 }
-
-const notifications_ref = ref(null)
 
 onMounted(() => {
   all_leagues_raw.value = getCachedLeagues()
