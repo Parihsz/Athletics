@@ -117,12 +117,11 @@ import EventTable from '@/components/eventTable.vue'
 import LocationInput from '@/components/locationInput.vue'
 import MapModal from '@/components/mapModal.vue'
 
-// ✅ Load from shared preload
 import {
   getCachedLeagues,
   getCachedEvents,
   fetchLeaguesOnce
-} from '@/client/services/leagueService'
+} from '@/services/leagueService'
 
 const league_name = ref('')
 const teams = ref([])
