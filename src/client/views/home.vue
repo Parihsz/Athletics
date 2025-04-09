@@ -11,6 +11,7 @@
           Filter events and view schedules <3
         </p>
 
+        <!-- League Selector -->
         <div class="box filter-box mb-5 animated fadeInUp delay-2s">
           <h2 class="subtitle">Select League</h2>
           <div class="select is-fullwidth">
@@ -23,33 +24,35 @@
           </div>
         </div>
 
+        <!-- Filters Section (Fixed columns) -->
         <div class="columns is-multiline animated fadeInUp delay-2s">
-  <div class="column is-one-third">
-    <div class="box filter-box">
-      <h2 class="subtitle">Select Team(s)</h2>
-      <div class="team-checkboxes" style="max-height: 300px; overflow-y: auto;">
-        <div
-          class="field is-flex is-align-items-center mb-2"
-          v-for="team in ALL_TEAMS"
-          :key="team"
-        >
-          <label class="checkbox is-flex is-align-items-center">
-            <input
-              type="checkbox"
-              class="mr-2"
-              :value="team"
-              v-model="selected_teams"
-            />
-            {{ team }}
-          </label>
-        </div>
-      </div>
-      <p class="help mt-2">Select one or more teams</p>
-    </div>
-  </div>
-</div>
+          <!-- Team Filter -->
+          <div class="column is-one-third">
+            <div class="box filter-box">
+              <h2 class="subtitle">Select Team(s)</h2>
+              <div class="team-checkboxes" style="max-height: 300px; overflow-y: auto;">
+                <div
+                  class="field mb-2"
+                  v-for="team in ALL_TEAMS"
+                  :key="team"
+                >
+                  <label class="checkbox" style="display: flex; align-items: center;">
+                    <input
+                      type="checkbox"
+                      class="mr-2"
+                      :value="team"
+                      v-model="selected_teams"
+                      style="margin-right: 0.5rem;"
+                    />
+                    {{ team }}
+                  </label>
+                </div>
+              </div>
+              <p class="help mt-2">Select one or more teams</p>
+            </div>
+          </div>
 
-
+          <!-- Opponent and Date Filter -->
           <div class="column">
             <div class="box filter-box">
               <h2 class="subtitle">Select the Opponent</h2>
@@ -77,19 +80,21 @@
           </div>
         </div>
 
+        <!-- Event Table -->
         <div class="columns is-centered mt-6 animated fadeInUp delay-3s">
-        <div class="column is-11">
-          <EventTable
-            :headers="['LEAGUE', 'TEAM', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']"
-            :events="filtered_events"
-            @rowClicked="handle_row_clicked"
-          />
-          <div class="has-text-centered">
-            <button class="button is-primary mt-5">Notify Me!</button>
+          <div class="column is-11">
+            <EventTable
+              :headers="['LEAGUE', 'TEAM', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']"
+              :events="filtered_events"
+              @rowClicked="handle_row_clicked"
+            />
+            <div class="has-text-centered">
+              <button class="button is-primary mt-5" @click="notify_user">Notify Me!</button>
+            </div>
           </div>
         </div>
-        </div>
 
+        <!-- Map Modal -->
         <MapModal
           v-if="map_event"
           :event="map_event"
@@ -97,6 +102,7 @@
           @close="close_map_modal"
         />
       </div>
+    </div>
   </section>
 </template>
 

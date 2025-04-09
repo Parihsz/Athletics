@@ -49,14 +49,17 @@ function handleClick(event) {
 .event-table-container {
   width: 100%;
   max-width: 100%;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 0 1rem;
+  margin: 0 auto;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .table-wrapper {
   width: 100%;
   max-width: 100%;
+  margin-top: 1rem;
   overflow-x: auto;
 }
 
