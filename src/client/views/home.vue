@@ -76,6 +76,14 @@
             <button class="button is-primary mt-3" @click="notify_user">Notify Me!</button>
           </div>
         </div>
+
+        <!-- ✅ Render the map modal here -->
+        <MapModal
+          v-if="map_event"
+          :event="map_event"
+          :visible="show_map_modal"
+          @close="close_map_modal"
+        />
       </div>
     </div>
   </section>
@@ -90,7 +98,7 @@ dayjs.extend(customParseFormat)
 import api from '@/api'
 import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
-import MapModal from '@/components/mapModal.vue' // ✅
+import MapModal from '@/components/mapModal.vue'
 
 const selected_league = ref('')
 const selected_teams = ref([])
@@ -99,12 +107,13 @@ const selected_date_range = ref('')
 const all_leagues_raw = ref([])
 const all_events = ref([])
 
-const map_event = ref(null) // ✅
-const show_map_modal = ref(false) // ✅
+const map_event = ref(null)
+const show_map_modal = ref(false)
 
 const DATE_FILTERS = ['Today', 'Tomorrow', 'This Week', 'Next Week', 'This Season']
 
 const leagueNames = computed(() => Array.from(new Set(all_leagues_raw.value.map(l => l.name))))
+
 const ALL_TEAMS = computed(() => {
   const leagues = selected_league.value
     ? all_leagues_raw.value.filter(l => l.name === selected_league.value)
@@ -121,8 +130,8 @@ const OPPONENTS = computed(() => {
 })
 
 const SELECTED_DATE_LOOKUP = {
-  'Today': d => d.isSame(dayjs(), 'day'),
-  'Tomorrow': d => d.isSame(dayjs().add(1, 'day'), 'day'),
+  Today: d => d.isSame(dayjs(), 'day'),
+  Tomorrow: d => d.isSame(dayjs().add(1, 'day'), 'day'),
   'This Week': d => d.isSame(dayjs(), 'week'),
   'Next Week': d => {
     const start = dayjs().add(1, 'week').startOf('week')
@@ -141,7 +150,9 @@ const filtered_events = computed(() => {
   if (selected_teams.value.length > 0) filtered = filtered.filter(e => selected_teams.value.includes(e.team))
   if (selected_opponent.value !== 'All Opponents') filtered = filtered.filter(e => e.vs === selected_opponent.value)
   if (selected_date_range.value) {
-    filtered = filtered.filter(e => SELECTED_DATE_LOOKUP[selected_date_range.value](dayjs(e.when, 'YYYY-MM-DD')))
+    filtered = filtered.filter(e =>
+      SELECTED_DATE_LOOKUP[selected_date_range.value](dayjs(e.when, 'YYYY-MM-DD'))
+    )
   }
   return filtered
 })
@@ -170,13 +181,12 @@ async function fetchLeagues() {
   )
 }
 
-const notifications_ref = ref(null)
-
 function notify_user() {
   notifications_ref.value?.addNotification('Upcoming event: Check the schedule!')
 }
 
 function handle_row_clicked(event) {
+  console.log('[handle_row_clicked]', event)
   map_event.value = event
   show_map_modal.value = true
 }
@@ -185,53 +195,7 @@ function close_map_modal() {
   show_map_modal.value = false
 }
 
+const notifications_ref = ref(null)
+
 onMounted(fetchLeagues)
 </script>
-
-<style scoped>
-.home-hero {
-  background: #f7f9fc;
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-}
-.filter-box {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
-}
-.animated { animation-duration: 0.6s; animation-fill-mode: both; }
-.fadeInDown { animation-name: fadeInDown; }
-.fadeInUp { animation-name: fadeInUp; }
-.delay-1s { animation-delay: 0.2s; }
-.delay-2s { animation-delay: 0.4s; }
-.delay-3s { animation-delay: 0.6s; }
-
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@media (max-width: 768px) {
-  .columns { flex-direction: column; }
-  .filter-box { margin-bottom: 1rem; }
-}
-h1.title, p.subtitle {
-  color: #222;
-}
-
-@media (prefers-color-scheme: dark) {
-  h1.title, p.subtitle {
-    color: #000000;
-  }
-}
-</style>
