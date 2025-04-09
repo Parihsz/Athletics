@@ -10,7 +10,7 @@ import {
   getCachedLeagues,
   getCachedEvents,
   fetchLeaguesOnce
-} from '@/client/services/leagueService'
+} from '@/services/leagueService'
 
 const league_name = ref('')
 const teams = ref([])

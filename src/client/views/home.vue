@@ -98,11 +98,10 @@ import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
 import MapModal from '@/components/mapModal.vue'
 
-// 🧠 Replace old fetching with instant preload service
 import {
   getCachedLeagues,
   getCachedEvents
-} from '@/client/services/leagueService'
+} from '@/services/leagueService'
 
 const selected_league = ref('')
 const selected_teams = ref([])

@@ -6,7 +6,7 @@ import 'bulma/css/bulma.css'
 import './style.css'
 
 import { Loader } from '@googlemaps/js-api-loader'
-import { fetchLeaguesOnce } from '@/client/services/leagueService' 
+import { fetchLeaguesOnce } from '@/services/leagueService' 
 
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 
