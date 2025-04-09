@@ -24,20 +24,31 @@
         </div>
 
         <div class="columns is-multiline animated fadeInUp delay-2s">
-          <div class="column is-one-third">
-            <div class="box filter-box">
-              <h2 class="subtitle">Select Team(s)</h2>
-              <div class="team-checkboxes" style="max-height: 300px; overflow-y: auto;">
-                <div class="field mb-2" v-for="team in ALL_TEAMS" :key="team">
-                  <label class="checkbox-label">
-                    <input type="checkbox" class="checkbox mr-2" :value="team" v-model="selected_teams" />
-                    {{ team }}
-                  </label>
-                </div>
-              </div>
-              <p class="help mt-2">Select one or more teams</p>
-            </div>
-          </div>
+  <div class="column is-one-third">
+    <div class="box filter-box">
+      <h2 class="subtitle">Select Team(s)</h2>
+      <div class="team-checkboxes" style="max-height: 300px; overflow-y: auto;">
+        <div
+          class="field is-flex is-align-items-center mb-2"
+          v-for="team in ALL_TEAMS"
+          :key="team"
+        >
+          <label class="checkbox is-flex is-align-items-center">
+            <input
+              type="checkbox"
+              class="mr-2"
+              :value="team"
+              v-model="selected_teams"
+            />
+            {{ team }}
+          </label>
+        </div>
+      </div>
+      <p class="help mt-2">Select one or more teams</p>
+    </div>
+  </div>
+</div>
+
 
           <div class="column">
             <div class="box filter-box">
@@ -66,15 +77,17 @@
           </div>
         </div>
 
-        <div class="columns mt-6 animated fadeInUp delay-3s">
-          <div class="column is-two-thirds">
-            <EventTable
-              :headers="['LEAGUE', 'TEAM', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']"
-              :events="filtered_events"
-              @rowClicked="handle_row_clicked"
-            />
-            <button class="button is-primary mt-3" @click="notify_user">Notify Me!</button>
+        <div class="columns is-centered mt-6 animated fadeInUp delay-3s">
+        <div class="column is-11">
+          <EventTable
+            :headers="['LEAGUE', 'TEAM', 'WHEN', 'WHAT', 'WHERE', 'VS', 'NOTES']"
+            :events="filtered_events"
+            @rowClicked="handle_row_clicked"
+          />
+          <div class="has-text-centered">
+            <button class="button is-primary mt-5">Notify Me!</button>
           </div>
+        </div>
         </div>
 
         <MapModal
@@ -84,7 +97,6 @@
           @close="close_map_modal"
         />
       </div>
-    </div>
   </section>
 </template>
 
