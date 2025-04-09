@@ -90,7 +90,7 @@ dayjs.extend(customParseFormat)
 import api from '@/api'
 import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
-import MapModal from '@/components/MapModal.vue' // ✅
+import MapModal from '@/components/mapModal.vue' // ✅
 
 const selected_league = ref('')
 const selected_teams = ref([])

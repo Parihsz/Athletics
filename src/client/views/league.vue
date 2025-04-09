@@ -115,7 +115,7 @@ import { ref, computed, onMounted } from 'vue'
 import api from '@/api'
 import EventTable from '@/components/eventTable.vue'
 import LocationInput from '@/components/locationInput.vue'
-import MapModal from '@/components/MapModal.vue'
+import MapModal from '@/components/mapModal.vue'
 
 const league_name = ref('')
 const teams = ref([])
