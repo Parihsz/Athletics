@@ -77,7 +77,6 @@
           </div>
         </div>
 
-        <!-- ✅ Render the map modal here -->
         <MapModal
           v-if="map_event"
           :event="map_event"
@@ -95,10 +94,15 @@ import dayjs from 'dayjs'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
 
-import api from '@/api'
 import Notifications from '@/components/notifications.vue'
 import EventTable from '@/components/eventTable.vue'
 import MapModal from '@/components/mapModal.vue'
+
+// 🧠 Replace old fetching with instant preload service
+import {
+  getCachedLeagues,
+  getCachedEvents
+} from '@/client/services/leagueService'
 
 const selected_league = ref('')
 const selected_teams = ref([])
@@ -112,7 +116,9 @@ const show_map_modal = ref(false)
 
 const DATE_FILTERS = ['Today', 'Tomorrow', 'This Week', 'Next Week', 'This Season']
 
-const leagueNames = computed(() => Array.from(new Set(all_leagues_raw.value.map(l => l.name))))
+const leagueNames = computed(() =>
+  Array.from(new Set(all_leagues_raw.value.map(l => l.name)))
+)
 
 const ALL_TEAMS = computed(() => {
   const leagues = selected_league.value
@@ -161,26 +167,6 @@ function APPLY_DATE_FILTER(label) {
   selected_date_range.value = label
 }
 
-async function fetchLeagues() {
-  const { data } = await api.get('/api/leagues')
-  all_leagues_raw.value = data
-
-  all_events.value = data.flatMap(league =>
-    league.teams.flatMap(team =>
-      team.games.map(game => ({
-        league: league.name,
-        team: team.name,
-        when: game.date,
-        what: 'Game',
-        where: game.location,
-        vs: game.opponent,
-        notes: game.notes,
-        position: game.position ?? null
-      }))
-    )
-  )
-}
-
 function notify_user() {
   notifications_ref.value?.addNotification('Upcoming event: Check the schedule!')
 }
@@ -197,5 +183,8 @@ function close_map_modal() {
 
 const notifications_ref = ref(null)
 
-onMounted(fetchLeagues)
+onMounted(() => {
+  all_leagues_raw.value = getCachedLeagues()
+  all_events.value = getCachedEvents()
+})
 </script>

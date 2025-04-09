@@ -30,7 +30,6 @@ watch(localValue, newVal => {
   emit('update:modelValue', newVal)
 })
 
-// Optional: geocode when typing stops (debounced) OR let parent do it on submit
 </script>
 
 <style scoped>
