@@ -2,7 +2,7 @@
   <div v-if="visible" class="modal is-active">
     <div class="modal-background" @click="close" />
     <div class="modal-content">
-      <div ref="mapContainer" class="google-map"></div>
+      <div ref="mapContainer" class="google-map" />
     </div>
     <button class="modal-close is-large" @click="close" />
   </div>
@@ -21,42 +21,75 @@ const mapContainer = ref(null)
 let map = null
 let marker = null
 let geocoder = null
+const locationCache = new Map()
 
 function close() {
   emit('close')
 }
 
-watch(() => props.visible, async (newVal) => {
-  if (newVal && props.event?.where) {
-    await nextTick()
-    if (!geocoder) geocoder = new google.maps.Geocoder()
+watch(() => props.visible, async (isVisible) => {
+  if (!isVisible || !props.event?.where) return
 
-    geocoder.geocode({ address: props.event.where }, (results, status) => {
-      if (status === 'OK') {
-        const location = results[0].geometry.location
-        if (!map) {
-          map = new google.maps.Map(mapContainer.value, {
-            center: location,
-            zoom: 15
-          })
-        } else {
-          map.setCenter(location)
-        }
+  await nextTick()
 
-        if (marker) marker.setMap(null)
+  const address = props.event.where
+  const title = props.event.what || 'Event'
 
-        marker = new google.maps.Marker({
-          map,
-          position: location,
-          title: props.event.what
-        })
-      }
-    })
+  if (!geocoder) geocoder = new google.maps.Geocoder()
+
+  const useCached = locationCache.get(address)
+
+  if (useCached) {
+    console.log('[MapModal] Using cached location:', address)
+    renderMap(useCached, title)
+    return
   }
+
+  geocoder.geocode({ address }, (results, status) => {
+    if (status === 'OK' && results[0]?.geometry?.location) {
+      const loc = results[0].geometry.location
+      locationCache.set(address, loc)
+      renderMap(loc, title)
+    } else {
+      console.warn('[MapModal] Failed to geocode:', status)
+    }
+  })
 })
+
+function renderMap(location, title) {
+  setTimeout(() => {
+    if (!map) {
+      map = new google.maps.Map(mapContainer.value, {
+        center: location,
+        zoom: 15
+      })
+    } else {
+      map.setCenter(location)
+      google.maps.event.trigger(map, 'resize')
+    }
+
+    if (marker) marker.setMap(null)
+
+    marker = new google.maps.Marker({
+      map,
+      position: location,
+      title
+    })
+  }, 100)
+}
 </script>
 
 <style scoped>
+.modal-content {
+  max-width: 90%;
+  max-height: 80vh;
+  margin: auto;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 1rem;
+}
+
 .google-map {
   width: 100%;
   height: 400px;
