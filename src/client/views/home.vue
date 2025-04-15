@@ -105,6 +105,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import dayjs from 'dayjs'
+import isBetween from 'dayjs/plugin/isBetween'
+dayjs.extend(isBetween)
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 dayjs.extend(customParseFormat)
 
