@@ -157,8 +157,7 @@ const SELECTED_DATE_LOOKUP = {
     return d.isBetween(start, end, null, '[]')
   },
   'This Season': d => {
-    const year = dayjs().year()
-    return d.isBetween(dayjs(`Mar 1, ${year}`, 'MMM D, YYYY'), dayjs(`May 31, ${year}`, 'MMM D, YYYY'), null, '[]')
+    return d.isValid() && d.isBetween('2024-01-01', '2025-12-31', null, '[]')
   }
 }
 
@@ -168,9 +167,11 @@ const filtered_events = computed(() => {
   if (selected_teams.value.length > 0) filtered = filtered.filter(e => selected_teams.value.includes(e.team))
   if (selected_opponent.value !== 'All Opponents') filtered = filtered.filter(e => e.vs === selected_opponent.value)
   if (selected_date_range.value) {
-    filtered = filtered.filter(e =>
-      SELECTED_DATE_LOOKUP[selected_date_range.value](dayjs(e.when, 'YYYY-MM-DD'))
-    )
+    filtered = filtered.filter(e => {
+  const parsed = dayjs(e.when)
+  return parsed.isValid() && SELECTED_DATE_LOOKUP[selected_date_range.value](parsed)
+})
+
   }
   return filtered
 })
